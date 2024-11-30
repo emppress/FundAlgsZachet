@@ -61,7 +61,6 @@ void swap(Node **n_1, Node **n_2)
 
 Node *merge_kernel(Node *root_1, Node *root_2, comp_keys cmp)
 {
-    Node *tmp;
     if (!root_1)
         return root_2;
     if (!root_2)
