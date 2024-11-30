@@ -52,51 +52,45 @@ void destroy_heap(Heap *heap)
     heap->cmp = NULL;
 }
 
-void merge_kernel(Node *root_1, Node *root_2, Node **res, comp_keys cmp)
+void swap(Node **n_1, Node **n_2)
 {
     Node *tmp;
+    tmp = *n_1;
+    *n_1 = *n_2;
+    *n_2 = tmp;
+}
+
+Node *merge_kernel(Node *root_1, Node *root_2, comp_keys cmp)
+{
     if (root_1 == NULL)
-    {
-        *res = root_2;
-        return;
-    }
+        return root_2;
+
     if (root_2 == NULL)
-    {
-        *res = root_1;
-        return;
-    }
+        return root_1;
 
     if (cmp(&root_1->key, &root_2->key) > 0)
+        swap(&root_1, &root_2);
+
+    root_1->r = merge_kernel(root_1->r, root_2, cmp);
+
+    if (root_1->l == NULL || root_1->l->rank < root_1->r->rank)
     {
-        *res = root_2;
-        merge_kernel(root_2->r, root_1, &tmp, cmp);
-    }
-    else
-    {
-        *res = root_1;
-        merge_kernel(root_1->r, root_2, &tmp, cmp);
-    }
-    (*res)->r = tmp;
-    if ((*res)->l == NULL || ((*res)->l->rank < (*res)->r->rank))
-    {
-        tmp = (*res)->l;
-        (*res)->l = (*res)->r;
-        (*res)->r = tmp;
+        swap(&root_1->l, &root_1->r);
     }
 
-    (*res)->rank = ((*res)->r) ? min((*res)->l->rank, (*res)->r->rank) + 1 : 1;
+    root_1->rank = (root_1->r) ? min(root_1->l->rank, root_1->r->rank) + 1 : 1;
+    return root_1;
 }
 
 // разрушением будет являться запись результата в heap_1
 // и обнуление heap_2
 void merge_with_destroy(Heap *heap_1, Heap *heap_2)
 {
-    Node *root_res;
+
     if (!heap_1 || !heap_2)
         return;
 
-    merge_kernel(heap_1->root, heap_2->root, &root_res, heap_1->cmp);
-    heap_1->root = root_res;
+    heap_1->root = merge_kernel(heap_1->root, heap_2->root, heap_1->cmp);
     heap_2->cmp = NULL;
     heap_2->root = NULL;
 }
