@@ -150,6 +150,26 @@ void prefix(Node *root)
     prefix(root->r);
 }
 
+void delete_tree_kern(Node *root)
+{
+    if (!root)
+        return;
+
+    delete_tree_kern(root->l);
+    delete_tree_kern(root->r);
+    free(root);
+}
+
+void delete_tree(Tree *tree)
+{
+    if (!tree)
+        return;
+
+    delete_tree_kern(tree->root);
+    tree->root = NULL;
+    tree->comp = NULL;
+}
+
 void infix(Node *root)
 {
     if (!root)
@@ -188,5 +208,6 @@ int main()
 
     int *ptr;
     search_elem(&tree, 1, &ptr);
+    delete_tree(&tree);
     return 0;
 }
